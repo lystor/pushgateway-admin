@@ -1,0 +1,30 @@
+services:
+  pushgateway:
+    command:
+      - --push.disable-consistency-check
+      - --web.enable-admin-api
+    image: prom/pushgateway:v1.11.0
+    logging:
+      options:
+        max-size: 10m
+        max-file: "2"
+    ports:
+      - "9091:9091"
+    restart: unless-stopped
+
+  pushgateway-admin:
+    command:
+      - clean
+      - --url=http://pushgateway:9091
+      - --stale=60
+      - --sleep=60
+      - --timeout=5
+      - --dry-run
+    depends_on:
+      - pushgateway
+    image: lystor/pushgateway-admin:latest
+    logging:
+      options:
+        max-size: 10m
+        max-file: "2"
+    restart: unless-stopped
